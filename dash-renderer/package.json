@@ -15,7 +15,8 @@
     "format": "prettier --config .prettierrc --write \"src/**/*.js\"",
     "format:test": "prettier --config .prettierrc \"src/**/*.js\" --list-different",
     "test": "npm run lint",
-    "test:js": "jest"
+    "test:js": "jest",
+    "cypress:open": "cypress open"
   },
   "author": "chriddyp",
   "license": "MIT",
@@ -45,6 +46,8 @@
     "babel-loader": "^8.0.6",
     "css-loader": "^3.2.0",
     "cypress": "^3.8.3",
+    "cypress-commands": "^1.0.0",
+    "cypress-wait-until": "^1.6.1",
     "es-check": "^5.0.0",
     "eslint": "^5.15.3",
     "eslint-config-airbnb": "^17.1.0",

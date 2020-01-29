@@ -16,5 +16,19 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 
+// Cypress.on('uncaught:exception', (err, runnable) => {
+//     // returning false here prevents Cypress from
+//     // failing the test
+//     if (err instanceof  3) {
+        
+//     }
+//     try {
+        
+//     } catch (responseTimout) {
+//         console.error("expected condition not met within timeout")
+//     }
+//     return false
+// })
+
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

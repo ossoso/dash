@@ -33,21 +33,29 @@
     //         _wait._poll,  # pylint: disable=protected-access
     //     )
 
+// logging handled in ../support/index.js 
+// const _wait_for = (method, args, timeout, msg) => {
 
+// }
+import 'cypress-wait-until'
 
-const wait_for_text_to_equal = (selector, text, timeout=null) => {
-    try {
-        cy.get(selector).wait(timeout=timeout).as(textEl)
-        cy.get('@textEl').
-        its('text')
+Cypress.Commands.add("wait_for_text_to_equal", (selector, text, timeout=null) => {
+    cy.get(selector).as('textEl')
+    cy.wait('@textEl')
+    cy.wait('@textEl', { timeout })
+        cy.get('@textEl').should($textEl => {
+            try {
+                const elText = $textEl.text() | $textEl.value()
+                expect(elText).to.be(text)
+            } catch (err) {
+                // logger.exception("text_to_equal encountered an exception")
+                console.err("text_to_equal encountered an exception")
+            }
+        })
         // logger.debug(
         //     "text to equal {%s} => expected %s", elem.text, self.text
         // )
-
-    } catch (responseTimout) {
-        
-    }
-}
+})
 // ***********************************************
 // This example commands.js shows you how to
 // create various custom commands and overwrite
