@@ -111,8 +111,6 @@ def test_inin002_wildcard_callback(dash_duo):
     input1 = dash_duo.find_element("#input")
     dash_duo.clear_input(input1)
     input1.send_keys("hello world")
-
-    dash_duo.wait_for_text_to_equal("#output-1", "hello world")
     dash_duo.percy_snapshot(name="wildcard-callback-2")
 
     # an initial call, one for clearing the input

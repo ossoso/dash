@@ -33,7 +33,7 @@ context('Waiting', () => {
 
     it.only('simple callback', () => {
 
-      cy.wait_for_text_to_equal("#output-1", "initial value")
+      cy.wait_for_text_to_equal("#output-1", "initial value", 10000)
   })
   it('simple wait error', () => {
       
