@@ -17,7 +17,6 @@
 
 // }
 /// <reference types="Cypress" />
-import '@percy/cypress'
 import 'cypress-wait-until';
 
 const textContentHelper = ($el) => ($el.text() || $el.attr('value'))

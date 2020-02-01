@@ -1,5 +1,5 @@
 {
-    "extends": ["eslint:recommended", "prettier"],
+    "extends": ["airbnb"],
     "settings": {
       "react": {
         "createClass": "createReactClass", // Regex for Component Factory to use,
