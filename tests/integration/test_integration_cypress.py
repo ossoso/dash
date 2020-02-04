@@ -4,11 +4,11 @@ import time
 import pytest
 from copy import copy
 
-from bs4 import BeautifulSoup
-from selenium.webdriver.common.keys import Keys
+# from bs4 import BeautifulSoup
+# from selenium.webdriver.common.keys import Keys
 
 import dash_dangerously_set_inner_html
-import dash_flow_example
+# import dash_flow_example
 
 import dash_html_components as html
 import dash_core_components as dcc
@@ -25,16 +25,13 @@ from dash.exceptions import (
     IncorrectTypeException,
     NonExistentIdException,
 )
-from dash.testing.wait import until
+# from dash.testing.wait import until
 
 # cypress imports
-import subprocess, inspect, glob
+import subprocess, inspect, glob, os
 
-def test_inin001_simple_callback_cypress():
-    cy_args = 'npx cypress run --headless --spec cypress/integration/inin001_simple_callback.spec.js'.split(' ')
-    pytest.run()
-
-def test_inin001_simple_callback(dash_duo):
+@pytest.mark.only
+def test_inin001_simple_callback(dash_thread_server):
     app = Dash(__name__)
     app.layout = html.Div(
         [
@@ -50,32 +47,31 @@ def test_inin001_simple_callback(dash_duo):
         call_count.value += 1
         return value
 
-    dash_duo.start_server(app)
-
-    dash_duo.wait_for_text_to_equal("#output-1", "initial value")
-    dash_duo.percy_snapshot(name="simple-callback-1")
-
-    input1 = dash_duo.find_element("#input")
-    dash_duo.clear_input(input1)
-    input1.send_keys("hello world")
-
-    dash_duo.wait_for_text_to_equal("#output-1", "hello world")
-    dash_duo.percy_snapshot(name="simple-callback-2")
+    dash_thread_server(app, debug=True, use_reloader=False, use_debugger=True)
 
     # an initial call, one for clearing the input
     # and one for each hello world character
-    assert call_count.value == 2 + len("hello world")
 
-    cy_command = "./dash_renderer/node_modules/.bin/cypress run --headless\
-        --config \"./dash_renderer/cypress.json\" --spec "
-    cy_command_list = cy_command.split(' ')
-    # FIXME temporary shortcut to acquire test filenames
+    cy_proj = "dash-renderer"
+    cy_bin = os.path.join('.', cy_proj, 'node_modules', '.bin', 'cypress')
+    if os.name == 'nt':
+        cy_bin += '.cmd'
+    # cy_config = os.path.join('.', cy_proj, 'cypress.json')
+    # cy_command = f"{cy_bin} run --headless --config-file \"{cy_config}\" --spec "
     testname = inspect.getouterframes(inspect.currentframe())[0].function
-    cy_command_list.append(testname)
-    cy_outputs = subprocess.run(cy_command_list, capture_output=True, text=True)
+    testfile = testname + ".spec.js"
+    cy_testpath = os.path.join(cy_proj, "cypress", "integration", testfile)
+    cy_command = f"{cy_bin} run --headless --project {cy_proj} --spec {cy_testpath}"
+    # FIXME temporary shortcut to acquire test filenames
+    assert os.path.isfile(cy_bin)
+    assert os.path.isfile(cy_testpath)
+
+    cy_out = subprocess.call(cy_command)
+    # , capture_output=True, text=True)
+    assert call_count.value == 2 + len("hello world")
     # Issue being worked on
     # assert cy_outputs.stderr == ""
-    assert glob.glob(f"cypress/logs/failed-{testname}*").length == 0
+    assert len(glob.glob(f"cypress/logs/failed-{testname}*")) == 0
     # assert not dash_duo.get_logs()
 
 

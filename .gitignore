@@ -66,3 +66,6 @@ npm-debug*
 dash_renderer/
 digest.json
 VERSION.txt
+
+### windows testing
+*conv.bat

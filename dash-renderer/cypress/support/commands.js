@@ -37,7 +37,7 @@ Cypress.Commands.add('wait_for_text_to_equal', (selector, text, timeout = null) 
 			{
 				errorMsg: 'expected condition not met within timeout',
                 interval: 100,
-                timeout
+                timeout: timeout || 10000 // default timeout in dash.testing
 			}
 		)
         .should((elText) => {
