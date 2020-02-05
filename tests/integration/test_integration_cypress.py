@@ -25,12 +25,19 @@ from dash.exceptions import (
     IncorrectTypeException,
     NonExistentIdException,
 )
-# from dash.testing.wait import until
+from dash.testing.wait import until
 
 # cypress imports
-import subprocess, inspect, glob, os
+import inspect
+import cy_utils
+# NOTE if tests failing try:
+# dash_duo.wait_for_contains_text('input#some_input', str(NEW_VALUE), timeout=5)
+# Uncommenting the next two lines causes test to pass on Windows
+#if platform.system() == 'Windows':
+#    dash_duo.clear_input(input_element)
 
-def test_inin001_simple_callback(dash_thread_server):
+
+def test_inin001_simple_callback(dash_thread_server, cy_config):
     app = Dash(__name__)
     app.layout = html.Div(
         [
@@ -50,26 +57,16 @@ def test_inin001_simple_callback(dash_thread_server):
 
     # an initial call, one for clearing the input
     # and one for each hello world character
-    cy_proj = "dash-renderer"
-    cy_bin = os.path.join('.', cy_proj, 'node_modules', '.bin', 'cypress')
-    if os.name == 'nt':
-        cy_bin += '.cmd'
     # FIXME temporary shortcut to acquire test filenames
     testname = inspect.getouterframes(inspect.currentframe())[0].function
-    testfile = testname + ".spec.js"
-    cy_testpath = os.path.join(cy_proj, "cypress", "integration", testfile)
-    cy_command = f"{cy_bin} run --headless --project {cy_proj} --spec {cy_testpath}"
-    assert os.path.isfile(cy_bin)
-    assert os.path.isfile(cy_testpath)
-
-    cy_out = subprocess.call(cy_command)
+    cy_utils.run_headless(cy_config.basedir, testname)
     assert call_count.value == 2 + len("hello world")
     # Issue being worked on
-    assert len(glob.glob(f"cypress/logs/failed-{testname}*")) == 0
+    assert cy_utils.error_count(cy_config.cy_proj, testname) == 0
 
 
 @pytest.mark.only
-def test_inin002_wildcard_callback(dash_duo):
+def test_inin002_wildcard_callback(dash_thread_server):
     app = Dash(__name__)
     app.layout = html.Div(
         [
@@ -106,21 +103,14 @@ def test_inin002_wildcard_callback(dash_duo):
     def update_text(data):
         return data
 
-    dash_duo.start_server(app)
-    dash_duo.wait_for_text_to_equal("#output-1", "initial value")
-    dash_duo.percy_snapshot(name="wildcard-callback-1")
-
-    input1 = dash_duo.find_element("#input")
-    dash_duo.clear_input(input1)
-    input1.send_keys("hello world")
-    dash_duo.percy_snapshot(name="wildcard-callback-2")
+    dash_thread_server(app, debug=True, use_reloader=False, use_debugger=True)
 
     # an initial call, one for clearing the input
     # and one for each hello world character
     assert input_call_count.value == 2 + len("hello world")
 
     # should check cypress error log is empty here
-    assert not dash_duo.get_logs()
+    assert cy_utils.error_count(cy_proj, testname) == 0
 
 
 def test_inin003_aborted_callback(dash_duo):
@@ -173,9 +163,9 @@ def test_inin003_aborted_callback(dash_duo):
         callback2_count.value == 0
     ), "callback2 is never triggered, even on initial load"
 
+
     # double check that output1 and output2 children were not updated
-    assert dash_duo.find_element("#output1").text == initial_output
-    assert dash_duo.find_element("#output2").text == initial_output
+    cy_utils.run_headless(cy_proj, )
 
     assert not dash_duo.get_logs()
 

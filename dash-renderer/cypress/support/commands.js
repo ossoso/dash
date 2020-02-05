@@ -1,21 +1,3 @@
-// def _wait_for(self, method, args, timeout, msg):
-//     """Abstract generic pattern for explicit WebDriverWait."""
-//     _wait = (
-//         self._wd_wait
-//         if timeout is None
-//         else WebDriverWait(self.driver, timeout)
-//     )
-//     logger.debug(
-//         "method, timeout, poll => %s %s %s",
-//         method,
-//         _wait._timeout,  # pylint: disable=protected-access
-//         _wait._poll,  # pylint: disable=protected-access
-//     )
-
-// logging handled in ../support/index.js
-// const _wait_for = (method, args, timeout, msg) => {
-
-// }
 /// <reference types="Cypress" />
 import 'cypress-wait-until';
 
