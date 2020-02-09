@@ -1,0 +1,13 @@
+{
+  "specName": "sandbox.spec.js",
+  "title": "visit with trailing slash",
+  "suiteName": "testing cy",
+  "testId": "r3",
+  "testName": "testing cy visit with trailing slash",
+  "testError": "cy.visit() failed because you are attempting to visit a second unique domain.\n\nYou may only visit a single unique domain per test.\n\nDifferent subdomains are okay, but unique domains are not.\n\nThe previous domain you visited was: 'http://localhost:8050'\n\nYou're attempting to visit this new domain: 'http://google.com'\n\nYou may need to restructure some of your code to prevent this from happening.\n\nhttps://on.cypress.io/cannot-visit-second-unique-domain",
+  "testCommands": [
+    "visit http://localhost:8050",
+    "visit http://google.com"
+  ],
+  "screenshot": "visit-with-trailing-slash (failed).png"
+}

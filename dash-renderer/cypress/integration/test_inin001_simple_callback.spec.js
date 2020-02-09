@@ -6,11 +6,11 @@ context('simple callback interaction', () => {
   })
     it('simple callback', () => {
       cy.wait_for_text_to_equal("#output-1", "initial value", 0)
-      cy.percySnapshot(name="simple-callback-1")
+      cy.percy_snapshot(name="simple-callback-1")
 
       cy.get('#input').clear().type("hello world")
 
       cy.wait_for_text_to_equal("#output-1", "hello world")
-      cy.percySnapshot(name="simple-callback-2")
+      cy.percy_snapshot(name="simple-callback-2")
   })
 })

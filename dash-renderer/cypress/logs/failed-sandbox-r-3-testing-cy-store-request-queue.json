@@ -1,0 +1,15 @@
+{
+  "specName": "sandbox.spec.js",
+  "title": "store request queue",
+  "suiteName": "testing cy",
+  "testId": "r3",
+  "testName": "testing cy store request queue",
+  "testError": "Timed out retrying: cy.invoke() errored because the property: 'requestQueue' does not exist on your subject.\n\ncy.invoke() waited for the specified property 'requestQueue' to exist, but it never did.\n\nIf you do not expect the property 'requestQueue' to exist, then add an assertion such as:\n\ncy.wrap({ foo: 'bar' }).its('quux').should('not.exist')",
+  "testCommands": [
+    "visit http://localhost:8050",
+    "window ",
+    "its .store",
+    "invoke .requestQueue()"
+  ],
+  "screenshot": "store-request-queue (failed).png"
+}

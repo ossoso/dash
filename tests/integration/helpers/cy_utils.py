@@ -13,8 +13,15 @@ def run_headless(projectdir, testbasename, *args, **kwargs):
     cy_testpath = os.path.join(cy_proj, "cypress", "integration", testfile)
     cy_command = f"{cy_bin} run --headless --project {cy_proj} --spec {cy_testpath}"
     if len(**kwargs) != 0:
-        for arg, val in kwargs:
-            cy_command +=  f" --{arg} {val}"
+        for opt in kwargs.keys():
+            if opt not in {'env'}:
+                print(f'\"{opt}\" not handled')
+            elif opt == 'env':
+                cy_command += f" --{opt}"
+                for name, val in kwargs[opt].items():
+                    cy_command += f"{name}={val},"
+                cy_command = cy_command[0:-1]
+
     return subprocess.call(cy_command)
 
 

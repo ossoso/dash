@@ -11,6 +11,7 @@ context(`Raising PreventUpdate OR returning no_update prevents update and
     // could use JSON fixtures to read expected values
     cy.get('#output1').should('have.text', 'initial output')
     cy.get('#output2').should('have.text', 'initial output')
+    cy.percySnapshot(name="simple-callback-1")
 });
 });
 

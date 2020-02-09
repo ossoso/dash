@@ -1,0 +1,10 @@
+{
+  "specName": "sandbox.spec.js",
+  "title": "store request queue",
+  "suiteName": "testing cy",
+  "testId": "r4",
+  "testName": "testing cy store request queue",
+  "testError": "cy.window.its is not a function",
+  "testCommands": [],
+  "screenshot": "store-request-queue (failed).png"
+}

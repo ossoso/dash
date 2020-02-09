@@ -1,0 +1,17 @@
+{
+  "specName": "sandbox.spec.js",
+  "title": "style",
+  "suiteName": "testing cy",
+  "testId": "r3",
+  "testName": "testing cy style",
+  "testError": "Timed out retrying: expected '\"dash hello\"' to equal 'dash hello'",
+  "testCommands": [
+    "visit http://localhost:8050",
+    "get #input",
+    "type  hello",
+    "get #output",
+    "assert expected **<div#output.dash.hello>** to have CSS property **font-family**",
+    "assert expected **\"dash hello\"** to equal **dash hello**"
+  ],
+  "screenshot": "style (failed).png"
+}

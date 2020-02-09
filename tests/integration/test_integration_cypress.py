@@ -28,13 +28,39 @@ from dash.exceptions import (
 from dash.testing.wait import until
 
 # cypress imports
-import inspect
 import cy_utils
 # NOTE if tests failing try:
 # dash_duo.wait_for_contains_text('input#some_input', str(NEW_VALUE), timeout=5)
 # Uncommenting the next two lines causes test to pass on Windows
 #if platform.system() == 'Windows':
 #    dash_duo.clear_input(input_element)
+
+@pytest.mark.only
+def test_style(dash_thread_server):
+    call_count = Value("i")
+    app = Dash(__name__)
+
+    app.layout = html.Div([
+        dcc.Input(id="input", value="dash"),
+        html.Div(html.Div(id="output"), id="output-container"),
+    ])
+
+    @app.callback(
+        [Output("output", "children"),
+         Output("output", "style"),
+         Output("output", "className")],
+        [Input("input", "value")]
+    )
+    def update_output(value):
+        call_count.value += 1
+        return [
+            value,
+            {"fontFamily": value},
+            value
+        ]
+
+    dash_thread_server(app, debug=True, use_reloader=False, use_debugger=True)
+    assert 0
 
 
 def test_inin001_simple_callback(dash_thread_server, cy_config):
@@ -54,19 +80,18 @@ def test_inin001_simple_callback(dash_thread_server, cy_config):
         return value
 
     dash_thread_server(app, debug=True, use_reloader=False, use_debugger=True)
-
     # an initial call, one for clearing the input
     # and one for each hello world character
     # FIXME temporary shortcut to acquire test filenames
-    testname = inspect.getouterframes(inspect.currentframe())[0].function
-    cy_utils.run_headless(cy_config.basedir, testname)
+    cy = cy_config
+    cy_utils.run_headless(cy.basedir, cy.testname)
     assert call_count.value == 2 + len("hello world")
     # Issue being worked on
-    assert cy_utils.error_count(cy_config.cy_proj, testname) == 0
+    assert cy_utils.error_count(cy.basedir, cy.testname) == 0
 
 
-@pytest.mark.only
-def test_inin002_wildcard_callback(dash_thread_server):
+# @pytest.mark.only
+def test_inin002_wildcard_callback(dash_thread_server, cy_config):
     app = Dash(__name__)
     app.layout = html.Div(
         [
@@ -110,10 +135,10 @@ def test_inin002_wildcard_callback(dash_thread_server):
     assert input_call_count.value == 2 + len("hello world")
 
     # should check cypress error log is empty here
-    assert cy_utils.error_count(cy_proj, testname) == 0
+    assert cy_utils.error_count(cy_config.basedir, cy_config.testname) == 0
 
 
-def test_inin003_aborted_callback(dash_duo):
+def test_inin003_aborted_callback(dash_thread_server, cy_config):
     """Raising PreventUpdate OR returning no_update prevents update and
     triggering dependencies."""
 
@@ -147,11 +172,9 @@ def test_inin003_aborted_callback(dash_duo):
         callback2_count.value += 1
         return value
 
-    dash_duo.start_server(app)
-
-    input_ = dash_duo.find_element("#input")
-    input_.send_keys("xyz")
-    dash_duo.wait_for_text_to_equal("#input", "initial inputxyz")
+    dash_thread_server(app, debug=True, use_reloader=False, use_debugger=True)
+    cy = cy_config
+    cy_utils.run_headless(cy.basedir, cy.testname, env={'PHASE': 1})
 
     until(
         lambda: callback1_count.value == 4,
@@ -165,14 +188,14 @@ def test_inin003_aborted_callback(dash_duo):
 
 
     # double check that output1 and output2 children were not updated
-    cy_utils.run_headless(cy_proj, )
+    cy_utils.run_headless(cy.basedir, cy.testname, env={'PHASE': 2})
 
-    assert not dash_duo.get_logs()
+    # incorporated in cypress spec
+    # assert not dash_duo.get_logs()
+    # dash_duo.percy_snapshot(name="aborted")
 
-    dash_duo.percy_snapshot(name="aborted")
 
-
-def test_inin004_wildcard_data_attributes(dash_duo):
+def test_inin004_wildcard_data_attributes(dash_thread_server):
     app = Dash()
     test_time = datetime.datetime(2012, 1, 10, 2, 3)
     test_date = datetime.date(test_time.year, test_time.month, test_time.day)
