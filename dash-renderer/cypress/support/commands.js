@@ -159,7 +159,19 @@ Cypress.Commands.add('wait_for_style_to_equal', (
     { timeout })
 )
 
-const select_dcc_dropdown = function()
+const select_dcc_dropdown = function(element, arg1, arg2, arg3) {
+    if (element) {
+        const value = arg1
+        const index = arg2
+        const getSubject = () => cy.wrap(element)
+    } else {
+        const selector = arg1
+        const value = arg2
+        const index = arg3
+        const getSubject = () => cy.get(selector)
+    }
+    getSubject().get()
+}
 Cypress.Commands.add('select_dcc_dropdown', { prevSubject: 'optional' }, ())
 
 const wait_for_contains_text = 
