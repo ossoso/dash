@@ -4,7 +4,10 @@
   "suiteName": "testing cy",
   "testId": "r4",
   "testName": "testing cy store request queue",
-  "testError": "cy.window.its is not a function",
-  "testCommands": [],
+  "testError": "Timed out retrying: cy.its() errored because the property: 'store' does not exist on your subject.\n\ncy.its() waited for the specified property 'store' to exist, but it never did.\n\nIf you do not expect the property 'store' to exist, then add an assertion such as:\n\ncy.wrap({ foo: 'bar' }).its('quux').should('not.exist')",
+  "testCommands": [
+    "window ",
+    "its .store"
+  ],
   "screenshot": "store-request-queue (failed).png"
 }

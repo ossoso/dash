@@ -1,8 +1,9 @@
 /// <reference types="Cypress" />
 import 'cypress-wait-until'
-import 'fs'
+import { CLIENT_RENEG_WINDOW } from 'tls'
 
-const DASHT_BROWSER_TIMEOUT = 10000
+// controls how long wait_for* functions are retried for
+const DASH_TESTING_TIMEOUT = Cypress.env('DASH_TESTING_TIMEOUT') || 10000
 
 const textContentHelper = ($el) => ($el.text() || $el.attr('value'))
 
@@ -44,19 +45,18 @@ const _wait_for_callbacks = function(timeout, poll) {
             )
         }),
         interval: poll*1000,
-        timeout: timeout || 10000 // default timeout in dash.testing
+        timeout: timeout || DASH_TESTING_TIMEOUT // default timeout in dash.testing
     }
 }
 Cypress.Commands.add('_wait_for_callbacks', _wait_for_callbacks)
 
 // TODO can be refactored to separate wait_cond
-const wait_for_text_to_equal = function(selector, text, timeout = null) {
-    // cy.waitUntil(() => true)
+const _wait_for_text_to_equal = function(elem_or_selector_, text, timeout = null) {
+    return (
 	cy.waitUntil(
-			// () => cy.get(selector).then(($textEl) => textContentHelper($textEl)),
             () => {
                     return (
-                        cy.get(selector).then(($el) => (
+                        elem_or_selector_().then(($el) => (
                             ($el.text() === text) && $el.text()
                             || ($el.attr('value') === text) && $el.attr('value')
                         )
@@ -66,44 +66,34 @@ const wait_for_text_to_equal = function(selector, text, timeout = null) {
 			{
 				errorMsg: 'expected condition not met within timeout',
                 interval: 100,
-                timeout: timeout || DASHT_BROWSER_TIMEOUT // default timeout in dash.testing
+                timeout: timeout || DASH_TESTING_TIMEOUT // default timeout in dash.testing
 			}
 		)
         .should((elText) => {
             expect(elText).to.eq(text)
         })
+)
 }
-Cypress.Commands.add('wait_for_text_to_equal', wait_for_text_to_equal)
+
+const wait_for_text_to_equal = function() {
+    return (
+        _wait_for_text_to_equal(..._standardizeFunArgs(...arguments))
+    )
+}
+
+// Cypress.Commands.add('wait_for_text_to_equal', { prevSubject: 'optional' }, wait_for_text_to_equal)
 
 const percy_snapshot = function(
         name = "",
         wait_for_callbacks = false
      ) {
-    // TODO pass in cypress env py version string
-    const snapshot_name = `${name} - ${process.env.PY_VERSION}`
+    const snapshot_name = `${name} - Cypress ${Cypress.config('version')}`
     console.log(`taking snapshot name => ${snapshot_name}`);
     if (wait_for_callbacks) {
         cy.wait(1000)
-        cy._wait_for_callbacks(timeout=40, poll=0.3)
+        cy._wait_for_callbacks(40, 0.3)
     }
-    cy.percySnapshot(name=snapshot_name)
-    // cy.get(path, { timeout: timeout || DASHT_BROWSER_TIMEOUT })
-	// cy.waitUntil(
-    //         () => {
-    //                 return (
-    //                     cy.get(selector).then(($el) => (
-    //                         ($el.text() === text) && $el.text()
-    //                         || ($el.attr('value') === text) && $el.attr('value')
-    //                     )
-    //                     )
-    //                 )
-    //         },
-	// 		{
-	// 			errorMsg: 'expected condition not met within timeout',
-    //             interval: 100,
-    //             timeout: timeout*1000 || 10000 // default timeout in dash.testing
-	// 		}
-	// 	)
+    return cy.percySnapshot(name=snapshot_name)
 }
 Cypress.Commands.add('percy_snapshot', percy_snapshot)
 
@@ -111,37 +101,46 @@ Cypress.Commands.add('percy_snapshot', percy_snapshot)
 const visit_and_snapshot = function(
         resource_path,
         hook_id,
-        wait_for_callbacks=True,
-        assert_check=True,
-        stay_on_page=False
-    ) { 
+        wait_for_callbacks=true,
+        assert_check=true,
+        stay_on_page=false
+    ) {
     const path = resource_path.replace(/\/$/, '')
     if (path != resource_path) {
         console.log("we stripped the left '/' in resource_path");
     }
     // TODO check consistent behavior with `expected_conditions'
-    cy.visit(`${process.env.SERVER_URL.replace(/\/$/, '')}\
-    /${path})`)
-    cy.get(`#${hook_id}`, { timeout: timeout || DASHT_BROWSER_TIMEOUT })
-    cy.percy_snapshot(path, wait_for_callbacks=wait_for_callbacks)
-    if (assert_check) {
-        //chain with on fail to get custom error message
-        cy.get("div.dash-debug-alert")
-        .should('not.exist')
+    cy.visit(`${Cypress.env('SERVER_URL').replace(/\/$/, '')}/${path}`)
+    cy.get(`#${hook_id}`, { timeout: timeout || 'DASH_TESTING_TIMEOUT' })
+    .then(() => {
+        cy.percy_snapshot(path, wait_for_callbacks)
+        if (assert_check) {
+            //chain with on fail to get custom error message
+            cy.get("div.dash-debug-alert")
+            .should('not.exist')
+        }
+        if (!stay_on_page) {
+            cy.go('back')
+        }
     }
-    if (!stay_on_page) {
-        cy.go('back')
-    }
+    )
 }
-Cypress.Commands.add('visit_and_snapshot', )
 
-Cypress.Commands.add('wait_for_style_to_equal2', (
-        selector, style, val, timeout=null
-    ) => {
-        cy.get(selector, {timeout}).should('have.css', style)
-        .and('be.eq', val)
-    }
-)
+Cypress.Commands.add('visit_and_snapshot', visit_and_snapshot)
+
+// Cypress.Commands.add('wait_for_style_to_equal2', (
+//         selector, style, val, timeout=null
+//     ) => {
+//         cy.get(selector, {timeout}).should('have.css', style)
+//         .and('be.eq', val)
+//     }
+// )
+
+const wait_for_element_by_css_selector = function (selector, timeout=null) {
+    cy.waitUntil(() => cy.get(selector), {
+        timeout: timeout || DASH_TESTING_TIMEOUT
+    })
+}
 
 Cypress.Commands.add('wait_for_style_to_equal', (
         selector, style, val, timeout=null
@@ -159,25 +158,58 @@ Cypress.Commands.add('wait_for_style_to_equal', (
     { timeout })
 )
 
-const select_dcc_dropdown = function(element, arg1, arg2, arg3) {
-    if (element) {
-        const value = arg1
-        const index = arg2
-        const getSubject = () => cy.wrap(element)
-    } else {
-        const selector = arg1
-        const value = arg2
-        const index = arg3
-        const getSubject = () => cy.get(selector)
-    }
-    getSubject().get()
+const select_dcc_dropdown = function() {
+    return (
+        _select_dcc_dropdown(..._standardizeFunArgs(...arguments))
+    )
 }
-Cypress.Commands.add('select_dcc_dropdown', { prevSubject: 'optional' }, ())
 
-const wait_for_contains_text = 
-Cypress.Commands.add('wait_for_contains_text', (selector, text, timeout = null) => {
 
-})
+const _standardizeFunArgs= function() {
+    //  added function signature for chainable functions is f(subject, options,...)
+    let getSubject
+    let i = 1
+    if (arguments[0]) {
+        getSubject = () => cy.wrap(arguments[0])
+    } else {
+        getSubject = () => cy.get(arguments[1])
+        i += 1
+    }
+    let argArray = new Array(arguments.length - i)
+    for (let j = 0; i < arguments.length; i++ && j++) {
+        argArray[j] = arguments[i]
+    }
+    return [ getSubject, ...argArray ]
+}
+
+const _select_dcc_dropdown = function(elem_or_selector_, value, index) {
+    elem_or_selector_().click().within(($dd) => {
+        cy.wrap($dd).get('div.Select-menu-outer').as('menu')
+        cy.get('@menu').then(($menu) => {
+            console.log(`the available options are ${
+                $menu.text().split('\n').join('|')
+            }`);
+            cy.wrap($menu).get('div.VirtualizedSelectOption').then(($options) => {
+                if (index) {
+                    cy.wrap($options[index]).click()
+                } else {
+                    $opts.filter(opt => opt.text() === value)
+                    .map(opt => opt.click())
+                }
+            }) // TODO "cannot find matching option using value=%s or index=%s",
+        })
+    })
+}
+Cypress.Commands.add(
+        'select_dcc_dropdown',
+        { prevSubject: 'optional' },
+        select_dcc_dropdown
+    )
+
+// const wait_for_contains_text = 
+// Cypress.Commands.add('wait_for_contains_text', (selector, text, timeout = null) => {
+
+// })
 
 
 const take_snapshot = (
@@ -186,37 +218,9 @@ const take_snapshot = (
     // TODO pass in cypress env py version string
     const target = process.platform === 'win32' ? process.env.TEMP : '/tmp/dash_artifacts'
     // check path existence
-    if (!fs.existsSync('target')) {
-        fs.mkdirSync(target)
-    }
+    cy.task('createIfNotExists', target)
     /* handled in dash by selenium\webdriver\chrome\webdriver.py
     */
     cy.screenshot(`${target}/${name}_${Cypress.spec.name.replace(/(\.spec)?(\.js)?$/, '')}.png`)
 }
-Cypress.Commands.add('take_snapshot', )
-
-// ***********************************************
-// This example commands.js shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-//
-//
-// -- This is a parent command --
-// Cypress.Commands.add("login", (email, password) => { ... })
-//
-//
-// -- This is a child command --
-// Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add("dismiss", { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This will overwrite an existing command --
-// Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+Cypress.Commands.add('take_snapshot', take_snapshot)

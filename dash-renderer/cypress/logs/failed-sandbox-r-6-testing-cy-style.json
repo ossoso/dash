@@ -2,7 +2,7 @@
   "specName": "sandbox.spec.js",
   "title": "style",
   "suiteName": "testing cy",
-  "testId": "r3",
+  "testId": "r6",
   "testName": "testing cy style",
   "testError": "cy.wait_for_style_to_equal is not a function",
   "testCommands": [],

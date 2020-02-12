@@ -1,0 +1,10 @@
+{
+  "specName": "sandbox.spec.js",
+  "title": "selectdropdown",
+  "suiteName": "testing cy",
+  "testId": "r7",
+  "testName": "testing cy selectdropdown",
+  "testError": "none is not defined",
+  "testCommands": [],
+  "screenshot": "selectdropdown (failed).png"
+}

@@ -1,0 +1,16 @@
+{
+  "specName": "sandbox.spec.js",
+  "title": "selectdropdown",
+  "suiteName": "testing cy",
+  "testId": "r3",
+  "testName": "testing cy selectdropdown",
+  "testError": "Cannot read property 'as' of undefined",
+  "testCommands": [
+    "visit http://localhost:8050",
+    "get #dd",
+    "click ",
+    "within ",
+    "within function(){}"
+  ],
+  "screenshot": "selectdropdown (failed).png"
+}

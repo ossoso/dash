@@ -1,4 +1,4 @@
-# pylint: disable=missing-docstring
+ pylint: disable=missing-docstring
 import os
 import sys
 import time
@@ -49,7 +49,7 @@ class Browser(DashPageMixin):
         download_path="",
         percy_finalize=True,
         percy_assets_root="",
-        wait_timeout=10,
+
     ):
         self._browser = browser.lower()
         self._remote_url = remote_url

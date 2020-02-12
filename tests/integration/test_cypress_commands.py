@@ -252,7 +252,49 @@ def test_select_dcc_dropdown(dash_thread_server):
             dcc.Dropdown(id='dd', value='foo', options=[{'label': 'foo', 'value': 1}, {'label': 'bar', 'value': 1}, {'label': 'baz', 'value': 1}])
         ]
     )
-    
+
+# from ./test_render.py
+def test_callbacks_with_shared_grandparent(dash_thread_server):
+    app = Dash()
+
+    app.layout = html.Div([
+        html.Div(id='session-id', children='id'),
+        dcc.Dropdown(id='dropdown-1'),
+        dcc.Dropdown(id='dropdown-2'),
+    ])
+
+    options = [{'value': 'a', 'label': 'a'}]
+
+    call_counts = {
+        'dropdown_1': Value('i', 0),
+        'dropdown_2': Value('i', 0)
+    }
+
+    @app.callback(
+        Output('dropdown-1', 'options'),
+        [Input('dropdown-1', 'value'),
+            Input('session-id', 'children')])
+    def dropdown_1(value, session_id):
+        call_counts['dropdown_1'].value += 1
+        return options
+
+    @app.callback(
+        Output('dropdown-2', 'options'),
+        [Input('dropdown-2', 'value'),
+            Input('session-id', 'children')])
+    def dropdown_2(value, session_id):
+        call_counts['dropdown_2'].value += 1
+        return options
+
+    dash_thread_server(app)
+
+    self.wait_for_element_by_css_selector('#session-id')
+    time.sleep(2)
+    self.assertEqual(call_counts['dropdown_1'].value, 1)
+    self.assertEqual(call_counts['dropdown_2'].value, 1)
+
+    self.assertTrue(self.is_console_clean())
+
 
 def test_inin004_wildcard_data_attributes(dash_thread_server):
     app = Dash()
