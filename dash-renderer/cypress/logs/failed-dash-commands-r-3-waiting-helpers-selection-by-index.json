@@ -1,0 +1,20 @@
+{
+  "specName": "dash-commands.spec.js",
+  "title": "selection by index",
+  "suiteName": "waiting helpers",
+  "testId": "r3",
+  "testName": "waiting helpers selection by index",
+  "testError": "p is not defined",
+  "testCommands": [
+    "visit http://localhost:8050",
+    "get #dropdown-2",
+    "click ",
+    "within ",
+    "wrap <div#dropdown-2>",
+    "get div.Select-menu-outer",
+    "wrap <div.Select-menu-outer>",
+    "get div.VirtualizedSelectOption",
+    "then [ <div.VirtualizedSelectOption.VirtualizedSelectFocusedOption>, 1 more... ], Object{3}, function(){}"
+  ],
+  "screenshot": "selection-by-index (failed).png"
+}

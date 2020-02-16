@@ -1,0 +1,23 @@
+{
+  "specName": "dash-commands.spec.js",
+  "title": "selection by index",
+  "suiteName": "dropdown",
+  "testId": "r6",
+  "testName": "waiting helpers dropdown selection by index",
+  "testError": "Timed out retrying: Expected to find content: '#dropdown-2' within the element: [ <div.VirtualizedSelectOption.VirtualizedSelectFocusedOption>, 3 more... ] but never did.",
+  "testCommands": [
+    "visit http://localhost:8050",
+    "get #dropdown-2",
+    "get #dropdown-2",
+    "wrap <div#dropdown-2>",
+    "click ",
+    "within ",
+    "wrap <div#dropdown-2>",
+    "get div.Select-menu-outer",
+    "wrap <div.Select-menu-outer>",
+    "get div.VirtualizedSelectOption",
+    "wrap [ <div.VirtualizedSelectOption.VirtualizedSelectFocusedOption>, 3 more... ]",
+    "contains #dropdown-2"
+  ],
+  "screenshot": "selection-by-index (failed).png"
+}

@@ -1,4 +1,4 @@
- pylint: disable=missing-docstring
+#pylint: disable=missing-docstring
 import os
 import sys
 import time

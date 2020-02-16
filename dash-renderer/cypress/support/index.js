@@ -15,8 +15,12 @@
 
 // Import commands.js using ES2015 syntax:
 require('cypress-failed-log')
+require('cypress-terminal-report').installSupport();
+require('cypress-commands');
+
 import '@percy/cypress'
 import './commands'
+
 
 // Cypress.on('uncaught:exception', (err, runnable) => {
 //     // returning false here prevents Cypress from

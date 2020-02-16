@@ -21,6 +21,7 @@ module.exports = (on, config) => {
   on('task', {
     failed: require('cypress-failed-log/src/failed')(),
   })
+  require('cypress-terminal-report').installPlugin(on);
   on("task", percyHealthCheck);
   on('task', {
     createIfNotExists (pathStr) {
@@ -41,7 +42,6 @@ module.exports = (on, config) => {
   // config modification only applied at cypress startup
   // these environment variables do not appear in Cypress.config
   config.env.DASH_TESTING_TIMEOUT = process.env.DASH_TESTING_TIMEOUT || 10000
-  config.env.SERVER_URL = 'http://localhost:8050'
-  config.env.TSTI = 1
+  config.env.SNAPSHOT_ = 1
   return config
 };

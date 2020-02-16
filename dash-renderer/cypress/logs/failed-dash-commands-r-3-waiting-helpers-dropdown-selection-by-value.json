@@ -1,0 +1,26 @@
+{
+  "specName": "dash-commands.spec.js",
+  "title": "dropdown selection by value",
+  "suiteName": "waiting helpers",
+  "testId": "r3",
+  "testName": "waiting helpers dropdown selection by value",
+  "testError": "Timed out retrying: expected '<span#react-select-3--value-item.Select-value-label>' to have value 'a', but the value was ''",
+  "testCommands": [
+    "visit http://localhost:8050",
+    "get #dropdown-2",
+    "click ",
+    "within ",
+    "wrap <div#dropdown-2>",
+    "get div.Select-menu-outer",
+    "wrap <div.Select-menu-outer>",
+    "get div.VirtualizedSelectOption",
+    "wrap <div.VirtualizedSelectOption.VirtualizedSelectFocusedOption>",
+    "click ",
+    "get #dropdown-2",
+    "get @dd2",
+    "within ",
+    "contains a",
+    "assert expected **<span#react-select-3--value-item.Select-value-label>** to have value **a**, but the value was **''**"
+  ],
+  "screenshot": "dropdown-selection-by-value (failed).png"
+}

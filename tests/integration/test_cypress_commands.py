@@ -35,7 +35,6 @@ import cy_utils
 #if platform.system() == 'Windows':
 #    dash_duo.clear_input(input_element)
 
-@pytest.mark.only
 def test_style(dash_thread_server):
     call_count = Value("i")
     app = Dash(__name__)
@@ -90,7 +89,6 @@ def test_inin001_simple_callback(dash_thread_server, cy_config):
     assert cy_utils.error_count(cy.basedir, cy.testname) == 0
 
 
-# @pytest.mark.only
 def test_inin002_wildcard_callback(dash_thread_server, cy_config):
     app = Dash(__name__)
     app.layout = html.Div(
@@ -254,13 +252,23 @@ def test_select_dcc_dropdown(dash_thread_server):
     )
 
 # from ./test_render.py
+@pytest.mark.only
 def test_callbacks_with_shared_grandparent(dash_thread_server):
     app = Dash()
 
     app.layout = html.Div([
         html.Div(id='session-id', children='id'),
-        dcc.Dropdown(id='dropdown-1'),
-        dcc.Dropdown(id='dropdown-2'),
+        dcc.Dropdown(id='dropdown-1', options=[{'value': 'a', 'label': 'a'}, {'value': 'b', 'label': 'b'}]),
+        dcc.Dropdown(id='dropdown-2', options=[
+            {'value': 'a',
+            'label': 'a'},
+            {'value': 'b',
+            'label': 'b'},
+            {'value': '1',
+            'label': 'dup'},
+            {'value': '2',
+            'label': 'dup'}
+        ]),
     ])
 
     options = [{'value': 'a', 'label': 'a'}]
@@ -270,23 +278,25 @@ def test_callbacks_with_shared_grandparent(dash_thread_server):
         'dropdown_2': Value('i', 0)
     }
 
-    @app.callback(
-        Output('dropdown-1', 'options'),
-        [Input('dropdown-1', 'value'),
-            Input('session-id', 'children')])
-    def dropdown_1(value, session_id):
-        call_counts['dropdown_1'].value += 1
-        return options
+    # @app.callback(
+    #     Output('dropdown-1', 'options'),
+    #     [Input('dropdown-1', 'value'),
+    #         Input('session-id', 'children')])
+    # def dropdown_1(value, session_id):
+    #     call_counts['dropdown_1'].value += 1
+    #     return options
 
-    @app.callback(
-        Output('dropdown-2', 'options'),
-        [Input('dropdown-2', 'value'),
-            Input('session-id', 'children')])
-    def dropdown_2(value, session_id):
-        call_counts['dropdown_2'].value += 1
-        return options
+    # @app.callback(
+    #     Output('dropdown-2', 'options'),
+    #     [Input('dropdown-2', 'value'),
+    #         Input('session-id', 'children')])
+    # def dropdown_2(value, session_id):
+    #     call_counts['dropdown_2'].value += 1
+    #     return options
 
     dash_thread_server(app)
+
+    assert 0
 
     self.wait_for_element_by_css_selector('#session-id')
     time.sleep(2)

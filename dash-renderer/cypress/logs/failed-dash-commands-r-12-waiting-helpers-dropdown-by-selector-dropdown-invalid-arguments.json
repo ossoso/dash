@@ -1,0 +1,20 @@
+{
+  "specName": "dash-commands.spec.js",
+  "title": "dropdown invalid arguments",
+  "suiteName": "dropdown by selector",
+  "testId": "r12",
+  "testName": "waiting helpers dropdown by selector dropdown invalid arguments",
+  "testError": "expected 'Timed out retrying: Expected to find element: \\'div.Select-menu-outer\\', but never found it.' to equal 'Invalid selection criteria'",
+  "testCommands": [
+    "visit http://localhost:8050",
+    "get #dropdown-2",
+    "get #dropdown-1",
+    "wrap <div#dropdown-1>",
+    "click ",
+    "within ",
+    "wrap <div#dropdown-1>",
+    "get div.Select-menu-outer",
+    "assert expected **Timed out retrying: Expected to find element: 'div.Select-menu-outer', but never found it.** to equal **Invalid selection criteria**"
+  ],
+  "screenshot": "dropdown-invalid-arguments (failed).png"
+}

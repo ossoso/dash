@@ -1,0 +1,14 @@
+{
+  "specName": "dash-commands.spec.js",
+  "title": "selection by index",
+  "suiteName": "dropdown by selector",
+  "testId": "r4",
+  "testName": "waiting helpers dropdown by selector selection by index",
+  "testError": "Timed out retrying: Expected to find element: 'null', but never found it.",
+  "testCommands": [
+    "visit http://localhost:8050",
+    "get #dropdown-2",
+    "get null"
+  ],
+  "screenshot": "selection-by-index (failed).png"
+}

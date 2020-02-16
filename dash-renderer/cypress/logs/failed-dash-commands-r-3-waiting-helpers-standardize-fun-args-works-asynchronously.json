@@ -1,0 +1,23 @@
+{
+  "specName": "dash-commands.spec.js",
+  "title": "_standardizeFunArgs works asynchronously",
+  "suiteName": "waiting helpers",
+  "testId": "r3",
+  "testName": "waiting helpers _standardizeFunArgs works asynchronously",
+  "testError": "Timed out retrying: cy.should() failed because this element is detached from the DOM.\n\n<div class=\"VirtualizedSelectOption VirtualizedSelectFocusedOption\" style=\"height: 35px; left: 0px; position: absolute; top: 0px; width: 100%;\">a</div>\n\nCypress requires elements be attached in the DOM to interact with them.\n\nThe previous command that ran was:\n\n  > cy.wrap()\n\nThis DOM element likely became detached somewhere between the previous and current command.\n\nCommon situations why this happens:\n  - Your JS framework re-rendered asynchronously\n  - Your app code reacted to an event firing and removed the element\n\nYou typically need to re-query for the element or add 'guards' which delay Cypress from running new commands.\n\nhttps://on.cypress.io/element-has-detached-from-dom",
+  "testCommands": [
+    "visit http://localhost:8050",
+    "get #dropdown-1",
+    "click ",
+    "within ",
+    "wrap <div#dropdown-1>",
+    "get div.Select-menu-outer",
+    "get @menu",
+    "wrap <div.Select-menu-outer>",
+    "get div.VirtualizedSelectOption",
+    "log 0truetrue",
+    "wrap <div.VirtualizedSelectOption.VirtualizedSelectFocusedOption>",
+    "click "
+  ],
+  "screenshot": "standardize-fun-args-works-asynchronously (failed).png"
+}

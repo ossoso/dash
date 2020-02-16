@@ -1,0 +1,14 @@
+{
+  "specName": "dash-commands.spec.js",
+  "title": "dropdown invalid arguments",
+  "suiteName": "dropdown by element",
+  "testId": "r6",
+  "testName": "waiting helpers dropdown by element dropdown invalid arguments",
+  "testError": "expected 'fun is not defined' to equal 'Invalid selection criteria'",
+  "testCommands": [
+    "visit http://localhost:8050",
+    "get #dropdown-2",
+    "assert expected **fun is not defined** to equal **Invalid selection criteria**"
+  ],
+  "screenshot": "dropdown-invalid-arguments (failed).png"
+}

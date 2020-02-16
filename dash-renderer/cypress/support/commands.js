@@ -1,11 +1,15 @@
 /// <reference types="Cypress" />
 import 'cypress-wait-until'
-import { CLIENT_RENEG_WINDOW } from 'tls'
 
 // controls how long wait_for* functions are retried for
 const DASH_TESTING_TIMEOUT = Cypress.env('DASH_TESTING_TIMEOUT') || 10000
 
 const textContentHelper = ($el) => ($el.text() || $el.attr('value'))
+
+const _until = function(timeout, poll, wait_cond) {
+    const wait_condition = 
+    cy.waitUntil
+}
 
 const _wait_for_callbacks = function(timeout, poll) {
     const _requestQueue = (params) => {
@@ -13,8 +17,10 @@ const _wait_for_callbacks = function(timeout, poll) {
             cy.window()
             .invoke('getState')
             .its('requestQueue')
+            .as('reQueue')
         )
     }
+    cy.
     cy.waitUntil(() => cy.window()
     .then(win => {
             if (win.store) {
@@ -56,7 +62,7 @@ const _wait_for_text_to_equal = function(elem_or_selector_, text, timeout = null
 	cy.waitUntil(
             () => {
                     return (
-                        elem_or_selector_().then(($el) => (
+                        elem_or_selector_.then(($el) => (
                             ($el.text() === text) && $el.text()
                             || ($el.attr('value') === text) && $el.attr('value')
                         )
@@ -165,7 +171,7 @@ const select_dcc_dropdown = function() {
 }
 
 
-const _standardizeFunArgs= function() {
+const _standardizeFunArgs_bkup = function() {
     //  added function signature for chainable functions is f(subject, options,...)
     let getSubject
     let i = 1
@@ -182,29 +188,53 @@ const _standardizeFunArgs= function() {
     return [ getSubject, ...argArray ]
 }
 
-const _select_dcc_dropdown = function(elem_or_selector_, value, index) {
-    elem_or_selector_().click().within(($dd) => {
-        cy.wrap($dd).get('div.Select-menu-outer').as('menu')
-        cy.get('@menu').then(($menu) => {
+
+// 
+const _standardizeFunArgs = function() {
+    //  added function signature for chainable functions is f(subject, options,...)
+    let subject
+    let i = 1
+    if (arguments[0]) {
+        subject = cy.wrap(arguments[0])
+    } else {
+        subject = cy.get(arguments[1])
+        i += 1
+    }
+    let argArray = new Array(arguments.length - i)
+    for (let j = 0; i < arguments.length; i++, j++) {
+        argArray[j] = arguments[i]
+    }
+    return [ subject, ...argArray ]
+}
+
+const _select_dcc_dropdown = function(elem_or_selector, value, index) {
+    elem_or_selector.click().within(($dd) => {
+        cy.wrap($dd).get('div.Select-menu-outer')
+        .then(($menu) => {
             console.log(`the available options are ${
                 $menu.text().split('\n').join('|')
             }`);
             cy.wrap($menu).get('div.VirtualizedSelectOption').then(($options) => {
-                if (index) {
-                    cy.wrap($options[index]).click()
+                if (
+                        Number.isInteger(index)
+                        && index < $options.length
+                    )
+                {
+                    cy.wrap($options).eq(index).click()
+                } else if (value) {
+                    cy.wrap($options).contains(value).click()
                 } else {
-                    $opts.filter(opt => opt.text() === value)
-                    .map(opt => opt.click())
+                    throw new Error('Invalid selection criteria');
                 }
             }) // TODO "cannot find matching option using value=%s or index=%s",
         })
     })
 }
 Cypress.Commands.add(
-        'select_dcc_dropdown',
-        { prevSubject: 'optional' },
-        select_dcc_dropdown
-    )
+    'select_dcc_dropdown',
+    { prevSubject: 'optional' },
+    select_dcc_dropdown
+)
 
 // const wait_for_contains_text = 
 // Cypress.Commands.add('wait_for_contains_text', (selector, text, timeout = null) => {
@@ -219,8 +249,7 @@ const take_snapshot = (
     const target = process.platform === 'win32' ? process.env.TEMP : '/tmp/dash_artifacts'
     // check path existence
     cy.task('createIfNotExists', target)
-    /* handled in dash by selenium\webdriver\chrome\webdriver.py
-    */
+    // handled in dash by selenium\webdriver\chrome\webdriver.py
     cy.screenshot(`${target}/${name}_${Cypress.spec.name.replace(/(\.spec)?(\.js)?$/, '')}.png`)
 }
 Cypress.Commands.add('take_snapshot', take_snapshot)

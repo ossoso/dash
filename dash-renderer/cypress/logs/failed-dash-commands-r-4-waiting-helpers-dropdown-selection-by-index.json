@@ -1,0 +1,13 @@
+{
+  "specName": "dash-commands.spec.js",
+  "title": "selection by index",
+  "suiteName": "dropdown",
+  "testId": "r4",
+  "testName": "waiting helpers dropdown selection by index",
+  "testError": "subj is not a function",
+  "testCommands": [
+    "visit http://localhost:8050",
+    "get #dropdown-2"
+  ],
+  "screenshot": "selection-by-index (failed).png"
+}
