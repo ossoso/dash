@@ -35,7 +35,6 @@ import cy_utils
 #if platform.system() == 'Windows':
 #    dash_duo.clear_input(input_element)
 
-@pytest.mark.only
 def test_style(dash_thread_server):
     call_count = Value("i")
     app = Dash(__name__)
@@ -63,6 +62,7 @@ def test_style(dash_thread_server):
     assert 0
 
 
+@pytest.mark.only
 def test_inin001_simple_callback(dash_thread_server, cy_config):
     app = Dash(__name__)
     app.layout = html.Div(
@@ -84,9 +84,9 @@ def test_inin001_simple_callback(dash_thread_server, cy_config):
     # and one for each hello world character
     # FIXME temporary shortcut to acquire test filenames
     cy = cy_config
-    cy_utils.run_headless(cy.basedir, cy.testname)
+    test_run = cy_utils.run_headless(cy.basedir, cy.testname)
     assert call_count.value == 2 + len("hello world")
-    # Issue being worked on
+    # use stderr to assert no errors
     assert cy_utils.error_count(cy.basedir, cy.testname) == 0
 
 
@@ -249,9 +249,14 @@ def test_select_dcc_dropdown(dash_thread_server):
     app = Dash(__name__)
     app.layout = html.Div(
         [
-            dcc.Dropdown(id='dd', value='foo', options=[{'label': 'foo', 'value': 1}, {'label': 'bar', 'value': 1}, {'label': 'baz', 'value': 1}])
+            dcc.Dropdown(id='dd', value='foo', options=[
+                {'label': 'foo', 'value': 1},
+                {'label': 'bar', 'value': 1},
+                {'label': 'baz', 'value': 1}
+            ])
         ]
     )
+    dash_thread_server(app)
     
 
 def test_inin004_wildcard_data_attributes(dash_thread_server):

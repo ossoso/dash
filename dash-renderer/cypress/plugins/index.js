@@ -1,4 +1,4 @@
-// ***********************************************************
+
 // This example plugins/index.js can be used to load plugins
 //
 // You can change the location of this file or turn off loading
@@ -12,9 +12,6 @@
 // the project's config changing)
 let percyHealthCheck = require('@percy/cypress/task')
 const fs = require('fs')
-
-const testingHooks = () => {
-}
 
 module.exports = (on, config) => {
   // used for pytest checks of reporting failed tests

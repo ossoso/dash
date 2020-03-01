@@ -14,27 +14,27 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
-require('cypress-failed-log')
-require('cypress-terminal-report').installSupport();
-require('cypress-commands');
+// require('cypress-failed-log')
+// require('cypress-terminal-report').installSupport();
+// require('cypress-commands');
 
-import '@percy/cypress'
-import './commands'
+// require('@percy/cypress')
+require('@percy/cypress')
+require('./commands')
 
-
-// Cypress.on('uncaught:exception', (err, runnable) => {
-//     // returning false here prevents Cypress from
-//     // failing the test
-//     if (err instanceof  3) {
-        
-//     }
-//     try {
-        
-//     } catch (responseTimout) {
-//         console.error("expected condition not met within timeout")
-//     }
+// Cypress.on('fail', (err) => {
+//     expect(1).to.eq(1)
+//     console.log('adsasd')
 //     return false
 // })
+
+
+// Cypress.on('uncaught:exception', (err) => {
+//     expect(1).to.eq(1)
+//     console.log('adsasd')
+//     return false
+// })
+
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

@@ -3,82 +3,91 @@ import 'cypress-wait-until'
 
 // controls how long wait_for* functions are retried for
 const DASH_TESTING_TIMEOUT = Cypress.env('DASH_TESTING_TIMEOUT') || 10000
+const DASH_TESTING_POLL = Cypress.env('DASH_TESTING_POLL') || 100
+const UNTIL_NOT_MET_MSG = 'expected condition not met within timeout'
 
 const textContentHelper = ($el) => ($el.text() || $el.attr('value'))
 
-const _until = function(timeout, poll, wait_cond) {
-    const wait_condition = 
-    cy.waitUntil
+// const _until = function(timeout, poll, wait_cond) {
+//     const wait_condition = 
+//     cy.waitUntil
+// }
+const _requestQueue = () => {
+    return (
+        cy.window()
+        .its('store')
+        .should('exist')
+        .invoke('getState')
+        .its('requestQueue')
+    )
 }
+Cypress.Commands.add('_requestQueue', _requestQueue)
 
 const _wait_for_callbacks = function(timeout, poll) {
-    const _requestQueue = (params) => {
-        return (
-            cy.window()
-            .invoke('getState')
-            .its('requestQueue')
-            .as('reQueue')
-        )
-    }
-    cy.
-    cy.waitUntil(() => cy.window()
-    .then(win => {
-            if (win.store) {
-                return (
-                    cy.wrap(win.store)
-                    .invoke('getState')
-                    .its('requestQueue').then($q => {
-                        const controllerIDd = $q.filter(x => x.controllerId)
-                        controllerIDd.length !== 0
-                        && controllerIDd.every(x => x.responseTime)
-                    })
-                )
+    let requestQueue
+
+    cy.prependOnceListener("fail", (err, runnable) => {
+        if (err.message === UNTIL_NOT_MET_MSG) {
+            const rqStringified = JSON.stringify(
+                requestQueue.filter((request) => !request.responseTime)
+            )
+            const newErr = new Error(
+                `wait_for_callbacks failed => status of invalid rqs: ${rqStringified}`
+            )
+            cy.emit('fail', newErr, runnable)
+            throw newErr
             } else {
-                return true
-            }
-        })
+            throw err
+        }
+    })
+    cy.waitUntil(() => (
+        cy.window()
+        .its('store')
+        .invoke('getState')
+        .its('requestQueue')
+        .then($q => {
+            requestQueue = $q
+            return (
+                $q.filter(x => x.controllerId)
+                .every(x => x.responseTime)
+            )
+    })
     ),
     {
-        // TODO detail in errorMsg failed requests and contents perhaps through callbackFn
-        errorMsg: (async () => {
-            return (
-                `wait_for_callbacks failed => status of invalid rqs: ${
-                                await JSON.stringify(
-                                    _requestQueue()
-                                    .filter((request) => !request.responseTime)
-                                )
-                }`
-            )
-        }),
-        interval: poll*1000,
-        timeout: timeout || DASH_TESTING_TIMEOUT // default timeout in dash.testing
-    }
+        errorMsg: UNTIL_NOT_MET_MSG,
+        interval: poll*1000 || 300,
+        timeout: timeout*1000 || DASH_TESTING_TIMEOUT // default timeout in dash.testing
+    })
 }
 Cypress.Commands.add('_wait_for_callbacks', _wait_for_callbacks)
 
 // TODO can be refactored to separate wait_cond
-const _wait_for_text_to_equal = function(elem_or_selector_, text, timeout = null) {
-    return (
+const _wait_for_text_to_equal = function(selector, text, timeout) {
+    const fnTimeout = timeout*1000 || DASH_TESTING_TIMEOUT
+
 	cy.waitUntil(
             () => {
+                    const $textEl = Cypress.$(selector)
                     return (
-                        elem_or_selector_.then(($el) => (
-                            ($el.text() === text) && $el.text()
-                            || ($el.attr('value') === text) && $el.attr('value')
-                        )
-                        )
+                        $textEl[0]
+                        && cy.wrap($textEl)
+                        .then(($el) => {
+                            if (
+                                $el.text() && ($el.text() === text)
+                                || (
+                                    $el.val()
+                                    && $el.val() === text
+                                )
+                            ) return text
+                        }).then(elText => expect(elText).to.be.eq(text))
                     )
             },
 			{
-				errorMsg: 'expected condition not met within timeout',
-                interval: 100,
-                timeout: timeout || DASH_TESTING_TIMEOUT // default timeout in dash.testing
+				errorMsg: `text -> ${text} not found within ${timeout}s`,
+                interval: DASH_TESTING_POLL,
+                timeout: fnTimeout
 			}
 		)
-        .should((elText) => {
-            expect(elText).to.eq(text)
-        })
-)
 }
 
 const wait_for_text_to_equal = function() {
@@ -88,6 +97,7 @@ const wait_for_text_to_equal = function() {
 }
 
 // Cypress.Commands.add('wait_for_text_to_equal', { prevSubject: 'optional' }, wait_for_text_to_equal)
+Cypress.Commands.add('wait_for_text_to_equal', { prevSubject: false }, _wait_for_text_to_equal)
 
 const percy_snapshot = function(
         name = "",
@@ -170,25 +180,6 @@ const select_dcc_dropdown = function() {
     )
 }
 
-
-const _standardizeFunArgs_bkup = function() {
-    //  added function signature for chainable functions is f(subject, options,...)
-    let getSubject
-    let i = 1
-    if (arguments[0]) {
-        getSubject = () => cy.wrap(arguments[0])
-    } else {
-        getSubject = () => cy.get(arguments[1])
-        i += 1
-    }
-    let argArray = new Array(arguments.length - i)
-    for (let j = 0; i < arguments.length; i++ && j++) {
-        argArray[j] = arguments[i]
-    }
-    return [ getSubject, ...argArray ]
-}
-
-
 // 
 const _standardizeFunArgs = function() {
     //  added function signature for chainable functions is f(subject, options,...)
@@ -201,7 +192,7 @@ const _standardizeFunArgs = function() {
         i += 1
     }
     let argArray = new Array(arguments.length - i)
-    for (let j = 0; i < arguments.length; i++, j++) {
+    for (let j = 0; i < arguments.length - 1; i++, j++) {
         argArray[j] = arguments[i]
     }
     return [ subject, ...argArray ]

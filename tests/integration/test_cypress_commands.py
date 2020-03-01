@@ -29,12 +29,13 @@ from dash.testing.wait import until
 
 # cypress imports run with .circleci as basedirectory
 import cy_utils
-# NOTE if tests failing try:
-# dash_duo.wait_for_contains_text('input#some_input', str(NEW_VALUE), timeout=5)
-# Uncommenting the next two lines causes test to pass on Windows
-#if platform.system() == 'Windows':
-#    dash_duo.clear_input(input_element)
 
+
+# NOTE if tests failing try:
+# dash_thread_server.wait_for_contains_text('input#some_input', str(NEW_VALUE), timeout=5)
+# Uncommenting the next two lines causes test to pass on Windows
+# if platform.system() == 'Windows':
+#    dash_thread_server.clear_input(input_element)
 def test_style(dash_thread_server):
     call_count = Value("i")
     app = Dash(__name__)
@@ -59,16 +60,17 @@ def test_style(dash_thread_server):
         ]
 
     dash_thread_server(app, debug=True, use_reloader=False, use_debugger=True)
-    assert 0
 
 
-def test_inin001_simple_callback(dash_thread_server, cy_config):
+@pytest.mark.only
+def select_dcc_dropdown(dash_thread_server, cy_config):
+    """App code from test_inin001_simple_callback"""
     app = Dash(__name__)
     app.layout = html.Div(
-        [
-            dcc.Input(id="input", value="initial value"),
-            html.Div(html.Div([1.5, None, "string", html.Div(id="output-1")])),
-        ]
+        # [
+        #     dcc.Input(id="input", value="initial value"),
+        #     html.Div(html.Div([1.5, none, "string", html.Div(id="output-1")])),
+        # ]
     )
 
     call_count = Value("i", 0)
@@ -83,9 +85,10 @@ def test_inin001_simple_callback(dash_thread_server, cy_config):
     # and one for each hello world character
     # FIXME temporary shortcut to acquire test filenames
     cy = cy_config
-    cy_utils.run_headless(cy.basedir, cy.testname)
+    spec_result = cy_utils.run_headless(cy.basedir, cy.testname)
     assert call_count.value == 2 + len("hello world")
     # Issue being worked on
+    assert 0
     assert cy_utils.error_count(cy.basedir, cy.testname) == 0
 
 
@@ -189,8 +192,8 @@ def test_inin003_aborted_callback(dash_thread_server, cy_config):
     cy_utils.run_headless(cy.basedir, cy.testname, env={'PHASE': 2})
 
     # incorporated in cypress spec
-    # assert not dash_duo.get_logs()
-    # dash_duo.percy_snapshot(name="aborted")
+    # assert not dash_thread_server.get_logs()
+    # dash_thread_server.percy_snapshot(name="aborted")
 
 
 # from devtools/test_hot_reload.py
@@ -201,6 +204,44 @@ RED_BG = """
 }
 """
 
+def test_waiting_for_text_content(dash_thread_server):
+    app = Dash(__name__
+
+    app.layout = html.Div(
+        [
+            html.Button("B", "btn"),
+            html.P("initial1", "n1"),
+            html.P("initial2", "n2"),
+            html.P("initial3", "n3"),
+            html.Ul([html.Li('listText', "initItem")], "initList")
+        ]
+    )
+
+    @app.callback(
+        [
+            Output("n1", "children"),
+            Output("n2", "children"),
+            Output("n3", "children"),
+        ],
+        [Input("btn", "n_clicks")],
+    )
+    def show_clicks(n):
+        # partial or complete cancelation of updates via no_update
+        return [
+            no_update if n and n > 4 else n,
+            no_update if n and n > 2 else n,
+            # make a new instance, to mock up caching and restoring no_update
+            copy(no_update),
+            no_update if n and n > 1 else n,
+        ]
+
+    dash_thread_server(app)
+
+    dash_thread_server.multiple_click("#btn", 10)
+
+    dash_thread_server.wait_for_text_to_equal("#n1", "4")
+    dash_thread_server.wait_for_text_to_equal("#n2", "2")
+    dash_thread_server.wait_for_text_to_equal("#n3", "initial3")
 
 def test_dvhr001_hot_reload(dash_thread_server):
     app = dash.Dash(__name__, assets_folder="hr_assets")
@@ -252,13 +293,15 @@ def test_select_dcc_dropdown(dash_thread_server):
     )
 
 # from ./test_render.py
-@pytest.mark.only
 def test_callbacks_with_shared_grandparent(dash_thread_server):
     app = Dash()
 
     app.layout = html.Div([
         html.Div(id='session-id', children='id'),
-        dcc.Dropdown(id='dropdown-1', options=[{'value': 'a', 'label': 'a'}, {'value': 'b', 'label': 'b'}]),
+        dcc.Dropdown(id='dropdown-1', options=[
+            {'value': 'a', 'label': 'a'},
+            {'value': 'b', 'label': 'b'}
+        ]),
         dcc.Dropdown(id='dropdown-2', options=[
             {'value': 'a',
             'label': 'a'},
@@ -296,14 +339,14 @@ def test_callbacks_with_shared_grandparent(dash_thread_server):
 
     dash_thread_server(app)
 
-    assert 0
-
     self.wait_for_element_by_css_selector('#session-id')
     time.sleep(2)
     self.assertEqual(call_counts['dropdown_1'].value, 1)
     self.assertEqual(call_counts['dropdown_2'].value, 1)
 
     self.assertTrue(self.is_console_clean())
+
+
 
 
 def test_inin004_wildcard_data_attributes(dash_thread_server):
@@ -320,9 +363,9 @@ def test_inin004_wildcard_data_attributes(dash_thread_server):
     }
     app.layout = html.Div([html.Div(**attrs)], id="data-element")
 
-    dash_duo.start_server(app)
+    dash_thread_server.start_server(app)
 
-    div = dash_duo.find_element("#data-element")
+    div = dash_thread_server.find_element("#data-element")
 
     # attribute order is ill-defined - BeautifulSoup will sort them
     actual = BeautifulSoup(div.get_attribute("innerHTML"), "lxml").decode()
@@ -337,10 +380,10 @@ def test_inin004_wildcard_data_attributes(dash_thread_server):
 
     assert actual == expected, "all attrs are included except None values"
 
-    assert not dash_duo.get_logs()
+    assert not dash_thread_server.get_logs()
 
 
-def test_inin005_no_props_component(dash_duo):
+def test_inin005_no_props_component(dash_thread_server):
     app = Dash()
     app.layout = html.Div(
         [
@@ -352,13 +395,13 @@ def test_inin005_no_props_component(dash_duo):
         ]
     )
 
-    dash_duo.start_server(app)
+    dash_thread_server.start_server(app)
 
-    assert not dash_duo.get_logs()
-    dash_duo.percy_snapshot(name="no-props-component")
+    assert not dash_thread_server.get_logs()
+    dash_thread_server.percy_snapshot(name="no-props-component")
 
 
-def test_inin006_flow_component(dash_duo):
+def test_inin006_flow_component(dash_thread_server):
     app = Dash()
 
     app.layout = html.Div(
@@ -392,12 +435,12 @@ def test_inin006_flow_component(dash_duo):
             ]
         )
 
-    dash_duo.start_server(app)
-    dash_duo.wait_for_element("#waitfor")
-    dash_duo.percy_snapshot(name="flowtype")
+    dash_thread_server.start_server(app)
+    dash_thread_server.wait_for_element("#waitfor")
+    dash_thread_server.percy_snapshot(name="flowtype")
 
 
-def test_inin007_meta_tags(dash_duo):
+def test_inin007_meta_tags(dash_thread_server):
     metas = [
         {"name": "description", "content": "my dash app"},
         {"name": "custom", "content": "customized"},
@@ -407,9 +450,9 @@ def test_inin007_meta_tags(dash_duo):
 
     app.layout = html.Div(id="content")
 
-    dash_duo.start_server(app)
+    dash_thread_server.start_server(app)
 
-    meta = dash_duo.find_elements("meta")
+    meta = dash_thread_server.find_elements("meta")
 
     # -2 for the meta charset and http-equiv.
     assert len(meta) == len(metas) + 2, "Should have 2 extra meta tags"
@@ -421,7 +464,7 @@ def test_inin007_meta_tags(dash_duo):
         assert meta_tag.get_attribute("content") == meta_info["content"]
 
 
-def test_inin008_index_customization(dash_duo):
+def test_inin008_index_customization(dash_thread_server):
     app = Dash()
 
     app.index_string = """<!DOCTYPE html>
@@ -458,16 +501,16 @@ def test_inin008_index_customization(dash_duo):
 
     app.layout = html.Div("Dash app", id="app")
 
-    dash_duo.start_server(app)
+    dash_thread_server.start_server(app)
 
-    assert dash_duo.find_element("#custom-header").text == "My custom header"
-    assert dash_duo.find_element("#custom-footer").text == "My custom footer"
-    assert dash_duo.wait_for_element("#add").text == "Got added"
+    assert dash_thread_server.find_element("#custom-header").text == "My custom header"
+    assert dash_thread_server.find_element("#custom-footer").text == "My custom footer"
+    assert dash_thread_server.wait_for_element("#add").text == "Got added"
 
-    dash_duo.percy_snapshot("custom-index")
+    dash_thread_server.percy_snapshot("custom-index")
 
 
-def test_inin009_invalid_index_string(dash_duo):
+def test_inin009_invalid_index_string(dash_thread_server):
     app = Dash()
 
     def will_raise():
@@ -497,7 +540,7 @@ def test_inin009_invalid_index_string(dash_duo):
 
     app.layout = html.Div("Hello World", id="a")
 
-    dash_duo.start_server(app)
+    dash_thread.start_server(app)
     assert dash_duo.find_element("#a").text == "Hello World"
 
 

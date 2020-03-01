@@ -12,7 +12,7 @@ def run_headless(projectdir, testbasename, *args, **kwargs):
     testfile = testname + ".spec.js"
     cy_testpath = os.path.join(cy_proj, "cypress", "integration", testfile)
     cy_command = f"{cy_bin} run --headless --project {cy_proj} --spec {cy_testpath}"
-    if len(**kwargs) != 0:
+    if len(kwargs) != 0:
         for opt in kwargs.keys():
             if opt not in {'env'}:
                 print(f'\"{opt}\" not handled')
@@ -22,7 +22,7 @@ def run_headless(projectdir, testbasename, *args, **kwargs):
                     cy_command += f"{name}={val},"
                 cy_command = cy_command[0:-1]
 
-    return subprocess.call(cy_command)
+    return subprocess.run(cy_command)
 
 
 # implementation based on cypress-failed-log
@@ -30,3 +30,5 @@ def run_headless(projectdir, testbasename, *args, **kwargs):
 def error_count(projectdir, testbasename):
     globpath = os.path.join(projectdir, "cypress", "logs", f"failed-{testbasename}*")
     return len(glob.glob(globpath))
+
+# def parse_output()
