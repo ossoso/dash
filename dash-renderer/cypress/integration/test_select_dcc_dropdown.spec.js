@@ -14,13 +14,19 @@ context('select_dcc_dropdown', () => {
             )
         }
     ]
+    it('also fails', () => {
+        expect(1).to.eq(2)
+    });
+    it('always fail', () => {
+        expect(1).to.eq(2)
+    });
     dropdownGetters.forEach(({ subjType: kind, dropdownGetter }) => {
         context(`dropdown by ${kind}`, () => {
             beforeEach(() => {
                 cy.visit('http://localhost:8050')
                 cy.get('#dropdown-2').as('dd2')
             });
-            it.only('selection by index', () => {
+            it('selection by index', () => {
                 dropdownGetter('#dropdown-2', null, 0)
                 cy.get('@dd2')
                 .contains('a')

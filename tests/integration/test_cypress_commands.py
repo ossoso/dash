@@ -62,15 +62,15 @@ def test_style(dash_thread_server):
     dash_thread_server(app, debug=True, use_reloader=False, use_debugger=True)
 
 
-@pytest.mark.only
-def select_dcc_dropdown(dash_thread_server, cy_config):
+# @pytest.mark.only
+def test_select_dcc_dropdown(dash_thread_server, cy_config):
     """App code from test_inin001_simple_callback"""
     app = Dash(__name__)
     app.layout = html.Div(
-        # [
-        #     dcc.Input(id="input", value="initial value"),
-        #     html.Div(html.Div([1.5, none, "string", html.Div(id="output-1")])),
-        # ]
+        [
+            dcc.Input(id="input", value="initial value"),
+            html.Div(html.Div([1.5, None, "string", html.Div(id="output-1")])),
+        ]
     )
 
     call_count = Value("i", 0)
@@ -88,7 +88,6 @@ def select_dcc_dropdown(dash_thread_server, cy_config):
     spec_result = cy_utils.run_headless(cy.basedir, cy.testname)
     assert call_count.value == 2 + len("hello world")
     # Issue being worked on
-    assert 0
     assert cy_utils.error_count(cy.basedir, cy.testname) == 0
 
 
@@ -205,7 +204,7 @@ RED_BG = """
 """
 
 def test_waiting_for_text_content(dash_thread_server):
-    app = Dash(__name__
+    app = Dash(__name__)
 
     app.layout = html.Div(
         [
@@ -284,15 +283,8 @@ def test_dvhr001_hot_reload(dash_thread_server):
     )
 
 
-def test_select_dcc_dropdown(dash_thread_server):
-    app = Dash(__name__)
-    app.layout = html.Div(
-        [
-            dcc.Dropdown(id='dd', value='foo', options=[{'label': 'foo', 'value': 1}, {'label': 'bar', 'value': 1}, {'label': 'baz', 'value': 1}])
-        ]
-    )
-
 # from ./test_render.py
+@pytest.mark.only
 def test_callbacks_with_shared_grandparent(dash_thread_server):
     app = Dash()
 
@@ -345,9 +337,6 @@ def test_callbacks_with_shared_grandparent(dash_thread_server):
     self.assertEqual(call_counts['dropdown_2'].value, 1)
 
     self.assertTrue(self.is_console_clean())
-
-
-
 
 def test_inin004_wildcard_data_attributes(dash_thread_server):
     app = Dash()

@@ -184,15 +184,15 @@ const select_dcc_dropdown = function() {
 const _standardizeFunArgs = function() {
     //  added function signature for chainable functions is f(subject, options,...)
     let subject
-    let i = 1
+    let i = 1 // starting index of parameters
     if (arguments[0]) {
-        subject = cy.wrap(arguments[0])
+        subject = cy.wrap(arguments[i-1])
     } else {
-        subject = cy.get(arguments[1])
         i += 1
+        subject = cy.get(arguments[i-1])
     }
     let argArray = new Array(arguments.length - i)
-    for (let j = 0; i < arguments.length - 1; i++, j++) {
+    for (let j = 0; i < arguments.length; i++, j++) {
         argArray[j] = arguments[i]
     }
     return [ subject, ...argArray ]
@@ -213,6 +213,7 @@ const _select_dcc_dropdown = function(elem_or_selector, value, index) {
                 {
                     cy.wrap($options).eq(index).click()
                 } else if (value) {
+                    // TODO select exact match only
                     cy.wrap($options).contains(value).click()
                 } else {
                     throw new Error('Invalid selection criteria');

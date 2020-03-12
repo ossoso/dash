@@ -14,10 +14,10 @@ let percyHealthCheck = require('@percy/cypress/task')
 const fs = require('fs')
 
 module.exports = (on, config) => {
-  // used for pytest checks of reporting failed tests
+/*   REPLACED by `cypress-terminal-report' used for pytest checks of reporting failed tests
   on('task', {
     failed: require('cypress-failed-log/src/failed')(),
-  })
+  }) */
   require('cypress-terminal-report').installPlugin(on);
   on("task", percyHealthCheck);
   on('task', {
